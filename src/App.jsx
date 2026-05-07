@@ -1,76 +1,77 @@
 import React, { useMemo, useState } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
-import {
-  Moon,
-  Sun,
-  Plus,
-  Upload,
-  Wallet,
-  TrendingUp,
-} from "lucide-react";
+                      ₹{expense.amount}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
-export default function App() {
-  const [darkMode, setDarkMode] = useState(false);
-  const [title, setTitle] = useState("");
-  const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState("Food");
-  const [customCategory, setCustomCategory] = useState("");
+          <div className="space-y-6">
+            <div
+              className={`${
+                darkMode ? "bg-zinc-900" : "bg-white"
+              } rounded-3xl p-6 shadow-xl`}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <TrendingUp className="text-yellow-500" />
+                <h2 className="text-2xl font-bold">AI Insights</h2>
+              </div>
 
-  const [expenses, setExpenses] = useState([
-    { title: "Zomato", amount: 350, category: "Food" },
-    { title: "Uber", amount: 220, category: "Travel" },
-    { title: "Netflix", amount: 649, category: "Bills" },
-    { title: "Shoes", amount: 2400, category: "Shopping" },
-  ]);
+              <div className="space-y-4 mt-6">
+                <div
+                  className={`${
+                    darkMode ? "bg-zinc-800" : "bg-blue-50"
+                  } p-4 rounded-2xl`}
+                >
+                  You are spending more on food this month.
+                </div>
 
-  const categories = [
-    "Food",
-    "Travel",
-    "Shopping",
-    "Bills",
-    "Business",
-    "Other",
-  ];
+                <div
+                  className={`${
+                    darkMode ? "bg-zinc-800" : "bg-green-50"
+                  } p-4 rounded-2xl`}
+                >
+                  Your shopping expenses decreased by 12%.
+                </div>
 
-  const finalCategory =
-    category === "Other" ? customCategory || "Other" : category;
+                <div
+                  className={`${
+                    darkMode ? "bg-zinc-800" : "bg-yellow-50"
+                  } p-4 rounded-2xl`}
+                >
+                  You are within your monthly budget.
+                </div>
+              </div>
+            </div>
 
-  const addExpense = () => {
-    if (!title || !amount) return;
+            <div
+              className={`${
+                darkMode ? "bg-zinc-900" : "bg-white"
+              } rounded-3xl p-6 shadow-xl`}
+            >
+              <h2 className="text-2xl font-bold mb-4">Quick Stats</h2>
 
-    setExpenses([
-      ...expenses,
-      {
-        title,
-        amount: Number(amount),
-        category: finalCategory,
-      },
-    ]);
+              <div className="space-y-5">
+                <div>
+                  <p className="text-gray-500 text-sm">Today</p>
+                  <h1 className="text-3xl font-bold">₹1,250</h1>
+                </div>
 
-    setTitle("");
-    setAmount("");
-    setCustomCategory("");
-  };
+                <div>
+                  <p className="text-gray-500 text-sm">This Week</p>
+                  <h1 className="text-3xl font-bold">₹8,400</h1>
+                </div>
 
-  const totalExpense = expenses.reduce((a, b) => a + b.amount, 0);
-
-  const pieData = useMemo(() => {
-    const grouped = {};
-
-    expenses.forEach((e) => {
-      grouped[e.category] = (grouped[e.category] || 0) + e.amount;
-    });
-
-    return Object.keys(grouped).map((key) => ({
-      name: key,
-      value: grouped[key],
-    }));
-  }, [expenses]);
-
+                <div>
+                  <p className="text-gray-500 text-sm">This Month</p>
+                  <h1 className="text-3xl font-bold">₹{totalExpense}</h1>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
