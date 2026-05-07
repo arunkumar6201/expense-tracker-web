@@ -1,4 +1,3 @@
-# Replace `src/App.jsx` with THIS COMPLETE CODE ONLY
 
 ```jsx
 import React, { useMemo, useState } from "react";
