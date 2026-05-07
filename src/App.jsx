@@ -51,6 +51,11 @@ export default function App() {
     setCustomCategory("");
   };
 
+  const deleteExpense = (index) => {
+    const updated = expenses.filter((_, i) => i !== index);
+    setExpenses(updated);
+  };
+
   const totalExpense = expenses.reduce(
     (a, b) => a + b.amount,
     0
@@ -78,56 +83,112 @@ export default function App() {
     "#8b5cf6",
   ];
 
+  const foodExpense = expenses
+    .filter((e) => e.category === "Food")
+    .reduce((a, b) => a + b.amount, 0);
+
   return (
     <div
-      className={`min-h-screen p-6 ${
+      className={`min-h-screen p-6 transition-all duration-300 ${
         darkMode
-          ? "bg-black text-white"
-          : "bg-gray-100 text-black"
+          ? "bg-[#0f172a] text-white"
+          : "bg-[#eef2f7] text-black"
       }`}
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
+
+        {/* HEADER */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">
-            Expense Tracker
-          </h1>
 
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="bg-blue-600 text-white px-6 py-3 rounded-full"
-          >
-            {darkMode ? "Light Mode" : "Dark Mode"}
-          </button>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white text-black rounded-3xl p-6 shadow-xl">
-            <h2 className="text-2xl font-bold mb-4">
-              Budget
-            </h2>
-
-            <h1 className="text-4xl font-bold">
-              ₹{totalExpense}
+          <div>
+            <h1 className="text-5xl font-bold">
+              Expense Tracker
             </h1>
 
             <p className="text-gray-500 mt-2">
-              Total Expenses
+              Premium Finance Dashboard
             </p>
           </div>
 
-          <div className="bg-white text-black rounded-3xl p-6 shadow-xl md:col-span-2">
-            <h2 className="text-2xl font-bold mb-4">
+          {/* PREMIUM SWITCH */}
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className={`w-32 h-16 rounded-full flex items-center px-2 transition-all duration-300 ${
+              darkMode
+                ? "bg-black"
+                : "bg-white shadow-lg"
+            }`}
+          >
+            <div
+              className={`w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold transition-all duration-300 ${
+                darkMode
+                  ? "translate-x-16"
+                  : "translate-x-0"
+              }`}
+            >
+              {darkMode ? "🌙" : "☀️"}
+            </div>
+          </button>
+        </div>
+
+        {/* TOP */}
+        <div className="grid lg:grid-cols-3 gap-6 mb-8">
+
+          {/* BUDGET */}
+          <div
+            className={`rounded-3xl p-6 shadow-xl ${
+              darkMode
+                ? "bg-[#1e293b]"
+                : "bg-white"
+            }`}
+          >
+            <h2 className="text-2xl font-bold mb-6">
+              Budget
+            </h2>
+
+            <h1 className="text-5xl font-bold">
+              ₹{totalExpense}
+            </h1>
+
+            <p className="text-gray-400 mt-3">
+              Total Expenses
+            </p>
+
+            <div className="mt-8">
+              <div className="w-full h-4 bg-gray-300 rounded-full overflow-hidden">
+                <div
+                  className="bg-blue-500 h-4 rounded-full"
+                  style={{
+                    width: `${Math.min(
+                      totalExpense / 100,
+                      100
+                    )}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* CHART */}
+          <div
+            className={`rounded-3xl p-6 shadow-xl lg:col-span-2 ${
+              darkMode
+                ? "bg-[#1e293b]"
+                : "bg-white"
+            }`}
+          >
+            <h2 className="text-2xl font-bold mb-6">
               Expense Distribution
             </h2>
 
-            <div style={{ width: "100%", height: 300 }}>
+            <div style={{ width: "100%", height: 320 }}>
               <ResponsiveContainer>
                 <PieChart>
                   <Pie
                     data={pieData}
                     dataKey="value"
                     nameKey="name"
-                    outerRadius={100}
+                    outerRadius={120}
                     label
                   >
                     {pieData.map((entry, index) => (
@@ -147,26 +208,38 @@ export default function App() {
           </div>
         </div>
 
-        <div className="bg-white text-black rounded-3xl p-6 shadow-xl mb-8">
-          <h2 className="text-2xl font-bold mb-6">
+        {/* ADD EXPENSE */}
+        <div
+          className={`rounded-3xl p-6 shadow-xl mb-8 ${
+            darkMode
+              ? "bg-[#1e293b]"
+              : "bg-white"
+          }`}
+        >
+          <h2 className="text-3xl font-bold mb-8">
             Add Expense
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-5">
+
             <input
               type="text"
               placeholder="Expense Title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="border p-4 rounded-2xl"
+              onChange={(e) =>
+                setTitle(e.target.value)
+              }
+              className="border p-5 rounded-2xl text-black"
             />
 
             <input
               type="number"
               placeholder="Amount"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="border p-4 rounded-2xl"
+              onChange={(e) =>
+                setAmount(e.target.value)
+              }
+              className="border p-5 rounded-2xl text-black"
             />
 
             <select
@@ -174,7 +247,7 @@ export default function App() {
               onChange={(e) =>
                 setCategory(e.target.value)
               }
-              className="border p-4 rounded-2xl"
+              className="border p-5 rounded-2xl text-black"
             >
               {categories.map((cat) => (
                 <option key={cat}>{cat}</option>
@@ -189,45 +262,143 @@ export default function App() {
                 onChange={(e) =>
                   setCustomCategory(e.target.value)
                 }
-                className="border p-4 rounded-2xl"
+                className="border p-5 rounded-2xl text-black"
               />
             )}
           </div>
 
-          <button
-            onClick={addExpense}
-            className="mt-6 bg-green-600 text-white px-8 py-4 rounded-2xl"
-          >
-            Add Expense
-          </button>
+          <div className="flex gap-4 mt-6 flex-wrap">
+
+            <button
+              onClick={addExpense}
+              className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-2xl font-semibold"
+            >
+              Add Expense
+            </button>
+
+            {/* SCREENSHOT */}
+            <label className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-2xl cursor-pointer font-semibold">
+              Upload Screenshot
+              <input type="file" hidden />
+            </label>
+          </div>
         </div>
 
-        <div className="bg-white text-black rounded-3xl p-6 shadow-xl">
-          <h2 className="text-2xl font-bold mb-6">
-            Recent Expenses
-          </h2>
+        {/* BOTTOM */}
+        <div className="grid lg:grid-cols-3 gap-6">
 
-          <div className="space-y-4">
-            {expenses.map((expense, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center bg-gray-100 p-4 rounded-2xl"
-              >
-                <div>
-                  <h3 className="font-bold">
-                    {expense.title}
-                  </h3>
+          {/* EXPENSES */}
+          <div className="lg:col-span-2">
 
-                  <p className="text-gray-500">
-                    {expense.category}
-                  </p>
+            <div
+              className={`rounded-3xl p-6 shadow-xl ${
+                darkMode
+                  ? "bg-[#1e293b]"
+                  : "bg-white"
+              }`}
+            >
+              <h2 className="text-3xl font-bold mb-8">
+                Recent Expenses
+              </h2>
+
+              <div className="space-y-5">
+
+                {expenses.map((expense, index) => (
+
+                  <div
+                    key={index}
+                    className={`p-5 rounded-2xl flex justify-between items-center ${
+                      darkMode
+                        ? "bg-[#0f172a]"
+                        : "bg-gray-100"
+                    }`}
+                  >
+                    <div>
+                      <h3 className="text-xl font-bold">
+                        {expense.title}
+                      </h3>
+
+                      <p className="text-gray-400">
+                        {expense.category}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+
+                      <div className="text-2xl font-bold">
+                        ₹{expense.amount}
+                      </div>
+
+                      <button
+                        onClick={() =>
+                          deleteExpense(index)
+                        }
+                        className="bg-red-500 text-white px-4 py-2 rounded-xl"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* AI */}
+          <div>
+
+            <div
+              className={`rounded-3xl p-6 shadow-xl ${
+                darkMode
+                  ? "bg-[#1e293b]"
+                  : "bg-white"
+              }`}
+            >
+              <h2 className="text-3xl font-bold mb-8">
+                AI Analysis
+              </h2>
+
+              <div className="space-y-5">
+
+                <div
+                  className={`p-5 rounded-2xl ${
+                    darkMode
+                      ? "bg-[#0f172a]"
+                      : "bg-blue-50"
+                  }`}
+                >
+                  Food expenses this month:
+                  <br />
+                  <span className="text-2xl font-bold">
+                    ₹{foodExpense}
+                  </span>
                 </div>
 
-                <div className="font-bold text-xl">
-                  ₹{expense.amount}
+                <div
+                  className={`p-5 rounded-2xl ${
+                    darkMode
+                      ? "bg-[#0f172a]"
+                      : "bg-green-50"
+                  }`}
+                >
+                  Total monthly spending:
+                  <br />
+                  <span className="text-2xl font-bold">
+                    ₹{totalExpense}
+                  </span>
+                </div>
+
+                <div
+                  className={`p-5 rounded-2xl ${
+                    darkMode
+                      ? "bg-[#0f172a]"
+                      : "bg-yellow-50"
+                  }`}
+                >
+                  You are managing your expenses well.
                 </div>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </div>
