@@ -1,5 +1,3 @@
-
-```jsx
 import React, { useMemo, useState } from "react";
 import {
   PieChart,
