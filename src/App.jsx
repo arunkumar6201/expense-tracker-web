@@ -1,18 +1,42 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Bar,
+} from "recharts";
 
 export default function App() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("Food");
   const [expenses, setExpenses] = useState([]);
   const [filter, setFilter] = useState("All");
 
-  const categories = ["All", "Food", "Travel", "Shopping", "Bills", "Business"];
+  const budget = 50000;
+
+  const categories = [
+    "All",
+    "Food",
+    "Travel",
+    "Shopping",
+    "Bills",
+    "Business",
+    "Other",
+  ];
 
   useEffect(() => {
     const saved = localStorage.getItem("expenses");
-    if (saved) setExpenses(JSON.parse(saved));
+    if (saved) {
+      setExpenses(JSON.parse(saved));
+    }
   }, []);
 
   useEffect(() => {
@@ -20,17 +44,14 @@ export default function App() {
   }, [expenses]);
 
   const addExpense = () => {
-    if (!title || !amount) {
-      alert("Please fill all fields");
-      return;
-    }
+    if (!title || !amount) return;
 
     const newExpense = {
       id: Date.now(),
       title,
       amount: Number(amount),
       category,
-      date: new Date().toLocaleDateString("en-IN"),
+      date: new Date().toLocaleDateString(),
     };
 
     setExpenses([newExpense, ...expenses]);
@@ -39,158 +60,318 @@ export default function App() {
   };
 
   const deleteExpense = (id) => {
-    setExpenses(expenses.filter((item) => item.id !== id));
+    setExpenses(expenses.filter((e) => e.id !== id));
   };
 
   const filteredExpenses =
     filter === "All"
       ? expenses
-      : expenses.filter((item) => item.category === filter);
+      : expenses.filter((e) => e.category === filter);
 
-  const total = expenses.reduce((sum, item) => sum + item.amount, 0);
+  const totalSpent = expenses.reduce((acc, item) => acc + item.amount, 0);
 
-  const formatINR = (value) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
+  const todaySpent = expenses
+    .filter(
+      (e) => e.date === new Date().toLocaleDateString()
+    )
+    .reduce((acc, item) => acc + item.amount, 0);
+
+  const categoryData = categories
+    .filter((c) => c !== "All")
+    .map((cat) => ({
+      name: cat,
+      value: expenses
+        .filter((e) => e.category === cat)
+        .reduce((acc, item) => acc + item.amount, 0),
+    }))
+    .filter((item) => item.value > 0);
+
+  const aiInsights = useMemo(() => {
+    const insights = [];
+
+    if (totalSpent > budget * 0.7) {
+      insights.push("⚠️ You already used 70% of your monthly budget.");
+    }
+
+    const foodTotal = expenses
+      .filter((e) => e.category === "Food")
+      .reduce((a, b) => a + b.amount, 0);
+
+    if (foodTotal > 5000) {
+      insights.push("🍔 Food spending is higher than usual.");
+    }
+
+    if (todaySpent > 2000) {
+      insights.push("💸 You spent heavily today.");
+    }
+
+    if (expenses.length < 3) {
+      insights.push("📊 Add more expenses for smarter AI insights.");
+    }
+
+    return insights;
+  }, [expenses]);
+
+  const COLORS = [
+    "#00C49F",
+    "#0088FE",
+    "#FFBB28",
+    "#FF8042",
+    "#AF19FF",
+    "#FF4560",
+  ];
 
   return (
-    <div className={`min-h-screen p-5 ${darkMode ? "bg-black text-white" : "bg-gray-100 text-black"}`}>
-      <div className="max-w-md mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
-        <div className="p-5 bg-black text-white flex justify-between items-center">
+    <div
+      className={`min-h-screen transition-all duration-300 ${
+        darkMode
+          ? "bg-black text-white"
+          : "bg-gray-100 text-black"
+      }`}
+    >
+      <div className="max-w-6xl mx-auto p-5">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-bold">Expense Tracker</h1>
-            <p className="text-sm text-gray-300">Free Expense Manager</p>
+            <h1 className="text-4xl font-bold">
+              Expense Tracker
+            </h1>
+            <p className="opacity-70">
+              Smart Personal Finance Manager
+            </p>
           </div>
 
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className="bg-white text-black px-3 py-2 rounded-xl"
+            className="px-4 py-2 rounded-xl bg-blue-600 text-white"
           >
-            {darkMode ? "☀️" : "🌙"}
+            {darkMode ? "Light Mode" : "Dark Mode"}
           </button>
         </div>
 
-        <div className="p-5 space-y-5">
-          <div className="bg-gradient-to-r from-black to-gray-700 text-white rounded-3xl p-5">
-            <p className="text-sm text-gray-300">Monthly Budget</p>
-            <h2 className="text-3xl font-bold mt-2">₹50,000</h2>
-            <p className="mt-3">Spent: {formatINR(total)}</p>
+        {/* Summary Cards */}
+        <div className="grid md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-blue-600 p-5 rounded-2xl">
+            <p>Total Budget</p>
+            <h2 className="text-3xl font-bold">
+              ₹{budget.toLocaleString("en-IN")}
+            </h2>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-gray-100 rounded-2xl p-3">
-              <p className="text-xs text-gray-500">Today</p>
-              <h2 className="font-bold mt-2">{formatINR(total)}</h2>
-            </div>
-
-            <div className="bg-gray-100 rounded-2xl p-3">
-              <p className="text-xs text-gray-500">Week</p>
-              <h2 className="font-bold mt-2">{formatINR(total)}</h2>
-            </div>
-
-            <div className="bg-gray-100 rounded-2xl p-3">
-              <p className="text-xs text-gray-500">Month</p>
-              <h2 className="font-bold mt-2">{formatINR(total)}</h2>
-            </div>
+          <div className="bg-red-500 p-5 rounded-2xl">
+            <p>Total Spent</p>
+            <h2 className="text-3xl font-bold">
+              ₹{totalSpent.toLocaleString("en-IN")}
+            </h2>
           </div>
 
-          <div className="space-y-3">
+          <div className="bg-green-600 p-5 rounded-2xl">
+            <p>Today</p>
+            <h2 className="text-3xl font-bold">
+              ₹{todaySpent.toLocaleString("en-IN")}
+            </h2>
+          </div>
+
+          <div className="bg-yellow-500 p-5 rounded-2xl text-black">
+            <p>Remaining</p>
+            <h2 className="text-3xl font-bold">
+              ₹{(budget - totalSpent).toLocaleString("en-IN")}
+            </h2>
+          </div>
+        </div>
+
+        {/* Add Expense */}
+        <div
+          className={`p-5 rounded-2xl mb-6 ${
+            darkMode ? "bg-gray-900" : "bg-white"
+          }`}
+        >
+          <h2 className="text-2xl font-bold mb-4">
+            Add Expense
+          </h2>
+
+          <div className="grid md:grid-cols-4 gap-3">
             <input
+              type="text"
+              placeholder="Expense title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Expense Title"
-              className="w-full border p-3 rounded-2xl"
+              className="p-3 rounded-xl text-black"
             />
 
             <input
               type="number"
+              placeholder="Amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="Amount"
-              className="w-full border p-3 rounded-2xl"
+              className="p-3 rounded-xl text-black"
             />
 
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full border p-3 rounded-2xl"
+              className="p-3 rounded-xl text-black"
             >
-              <option>Food</option>
-              <option>Travel</option>
-              <option>Shopping</option>
-              <option>Bills</option>
-              <option>Business</option>
+              {categories
+                .filter((c) => c !== "All")
+                .map((cat) => (
+                  <option key={cat}>{cat}</option>
+                ))}
             </select>
 
             <button
               onClick={addExpense}
-              className="w-full bg-black text-white py-3 rounded-2xl font-bold"
+              className="bg-blue-600 hover:bg-blue-700 p-3 rounded-xl"
             >
               Add Expense
             </button>
           </div>
+        </div>
 
-          <div>
-            <h2 className="font-bold mb-3">Filter Categories</h2>
+        {/* Filter */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setFilter(cat)}
+              className={`px-4 py-2 rounded-xl ${
+                filter === cat
+                  ? "bg-blue-600 text-white"
+                  : darkMode
+                  ? "bg-gray-800"
+                  : "bg-white"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
 
-            <div className="flex gap-2 overflow-x-auto">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setFilter(cat)}
-                  className={`px-4 py-2 rounded-full whitespace-nowrap ${
-                    filter === cat ? "bg-black text-white" : "bg-gray-200"
-                  }`}
+        {/* Charts */}
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
+          <div
+            className={`p-5 rounded-2xl ${
+              darkMode ? "bg-gray-900" : "bg-white"
+            }`}
+          >
+            <h2 className="text-2xl font-bold mb-4">
+              Expense Breakdown
+            </h2>
+
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={categoryData}
+                  dataKey="value"
+                  outerRadius={100}
+                  label
                 >
-                  {cat}
-                </button>
-              ))}
-            </div>
+                  {categoryData.map((entry, index) => (
+                    <Cell
+                      key={index}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
 
-          <div>
-            <h2 className="font-bold mb-3">Recent Expenses</h2>
+          <div
+            className={`p-5 rounded-2xl ${
+              darkMode ? "bg-gray-900" : "bg-white"
+            }`}
+          >
+            <h2 className="text-2xl font-bold mb-4">
+              Category Spending
+            </h2>
 
-            <div className="space-y-3">
-              {filteredExpenses.map((expense) => (
-                <div
-                  key={expense.id}
-                  className="bg-gray-100 p-4 rounded-2xl flex justify-between items-center"
-                >
-                  <div>
-                    <h3 className="font-semibold">{expense.title}</h3>
-                    <p className="text-sm text-gray-500">
-                      {expense.category} • {expense.date}
-                    </p>
-                  </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={categoryData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="#3B82F6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
 
-                  <div className="text-right">
-                    <p className="font-bold">{formatINR(expense.amount)}</p>
+        {/* AI Insights */}
+        <div
+          className={`p-5 rounded-2xl mb-6 ${
+            darkMode ? "bg-gray-900" : "bg-white"
+          }`}
+        >
+          <h2 className="text-2xl font-bold mb-4">
+            AI Smart Insights ✨
+          </h2>
 
-                    <button
-                      onClick={() => deleteExpense(expense.id)}
-                      className="text-red-500 text-sm mt-1"
-                    >
-                      Delete
-                    </button>
-                  </div>
+          <div className="space-y-2">
+            {aiInsights.map((insight, index) => (
+              <div
+                key={index}
+                className="p-3 rounded-xl bg-blue-600"
+              >
+                {insight}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Expense List */}
+        <div
+          className={`p-5 rounded-2xl ${
+            darkMode ? "bg-gray-900" : "bg-white"
+          }`}
+        >
+          <h2 className="text-2xl font-bold mb-4">
+            Recent Expenses
+          </h2>
+
+          <div className="space-y-3">
+            {filteredExpenses.length === 0 && (
+              <p>No expenses added.</p>
+            )}
+
+            {filteredExpenses.map((expense) => (
+              <div
+                key={expense.id}
+                className={`flex justify-between items-center p-4 rounded-xl ${
+                  darkMode
+                    ? "bg-gray-800"
+                    : "bg-gray-100"
+                }`}
+              >
+                <div>
+                  <h3 className="font-bold">
+                    {expense.title}
+                  </h3>
+
+                  <p className="opacity-70 text-sm">
+                    {expense.category} • {expense.date}
+                  </p>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          <div className="bg-yellow-50 border border-yellow-200 rounded-3xl p-4">
-            <h2 className="font-bold text-lg">Smart Insights ✨</h2>
+                <div className="flex items-center gap-4">
+                  <h2 className="font-bold text-xl">
+                    ₹{expense.amount.toLocaleString("en-IN")}
+                  </h2>
 
-            <div className="space-y-2 mt-3 text-sm text-gray-700">
-              <p>• Your spending increased this week.</p>
-              <p>• Food expenses are higher than average.</p>
-              <p>• You are close to your monthly budget limit.</p>
-            </div>
+                  <button
+                    onClick={() =>
+                      deleteExpense(expense.id)
+                    }
+                    className="bg-red-500 px-3 py-1 rounded-lg"
+                  >
+                    X
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
