@@ -1,8 +1,7 @@
-# Expense Tracker
+import { defineConfig } from 'vite'
 
-## Run locally
-npm install
-npm run dev
-
-## Deploy
-Upload to GitHub and import into Vercel.
+export default defineConfig({
+  server: {
+    port: 3000
+  }
+})
