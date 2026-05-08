@@ -53,18 +53,51 @@ export default function App() {
   const [catBudgets, setCatBudgets] = useState({});
   const [newTemplate, setNewTemplate] = useState({name:"",amount:"",category:"Food",note:""});
   const fileRef = useRef();
+useEffect(() => {
+  const savedExpenses = localStorage.getItem(SK);
 
-  useEffect(()=>{
-    (async()=>{
-      try{ const r=await window.storage.get(SK); if(r) setExpenses(JSON.parse(r.value)); }catch{}
-      try{ const r=await window.storage.get(BK); if(r){ const b=JSON.parse(r.value); setBudget(b); setBudgetInput({monthly:String(b.monthly),daily:String(b.daily)}); setCatBudgets(b.categories||{}); } }catch{}
-      try{ const r=await window.storage.get(GK); if(r) setGoals(JSON.parse(r.value)); }catch{}
-      try{ const r=await window.storage.get(TMPK); if(r) setTemplates(JSON.parse(r.value)); }catch{}
-      try{ const r=await window.storage.get(SETK); if(r) setSettings(JSON.parse(r.value)); }catch{}
-    })();
-  },[]);
+  if (savedExpenses) {
+    setExpenses(JSON.parse(savedExpenses));
+  }
 
-  const persist = async (key,val) => { try{ await window.storage.set(key,JSON.stringify(val)); }catch{} };
+  const savedBudget = localStorage.getItem(BK);
+
+  if (savedBudget) {
+    const b = JSON.parse(savedBudget);
+
+    setBudget(b);
+
+    setBudgetInput({
+      monthly: String(b.monthly),
+      daily: String(b.daily),
+    });
+
+    setCatBudgets(b.categories || {});
+  }
+
+  const savedGoals = localStorage.getItem(GK);
+
+  if (savedGoals) {
+    setGoals(JSON.parse(savedGoals));
+  }
+
+  const savedTemplates = localStorage.getItem(TMPK);
+
+  if (savedTemplates) {
+    setTemplates(JSON.parse(savedTemplates));
+  }
+
+  const savedSettings = localStorage.getItem(SETK);
+
+  if (savedSettings) {
+    setSettings(JSON.parse(savedSettings));
+  }
+}, []);
+
+const persist = (key, val) => {
+  localStorage.setItem(key, JSON.stringify(val));
+};
+ 
   const saveExp = list => { setExpenses(list); persist(SK,list); };
   const saveBudget = b => { setBudget(b); persist(BK,b); };
   const saveGoals = g => { setGoals(g); persist(GK,g); };
