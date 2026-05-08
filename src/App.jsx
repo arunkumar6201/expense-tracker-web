@@ -93,7 +93,7 @@ useEffect(() => {
     setSettings(JSON.parse(savedSettings));
   }
 }, []);
-
+  
 const persist = (key, val) => {
   localStorage.setItem(key, JSON.stringify(val));
 };
@@ -527,3 +527,4 @@ const persist = (key, val) => {
     </div>
   );
 }
+export default App;
