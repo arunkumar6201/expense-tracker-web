@@ -72,21 +72,4 @@ export default function App() {
     Business: {
       icon: <FaBriefcase />,
       color: "#8b5cf6",
-    },
-  };
-
-  const addExpense = () => {
-    if (!title || !amount) return;
-
-    const finalCategory =
-      category === "Other"
-        ? customCategory || "Other"
-        : category;
-
-    setExpenses([
-      ...expenses,
-      {
-        title,
-        amount: Number(amount),
-        category: finalCategory,
 };
