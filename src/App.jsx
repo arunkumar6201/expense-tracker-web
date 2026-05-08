@@ -1,75 +1,91 @@
-import { useMemo, useState } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from "recharts";
-
-import {
-  FaUtensils,
-  FaCar,
-  FaShoppingBag,
-  FaBolt,
-  FaBriefcase,
-  FaMoon,
-  FaSun,
-  FaTrash,
-  FaUpload,
-} from "react-icons/fa";
-
-import { motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
 
 export default function App() {
   const [darkMode, setDarkMode] = useState(false);
-
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("Food");
-  const [customCategory, setCustomCategory] = useState("");
 
-  const [expenses, setExpenses] = useState([
-    {
-      title: "Zomato",
-      amount: 350,
-      category: "Food",
-    },
-    {
-      title: "Uber",
-      amount: 220,
-      category: "Travel",
-    },
-    {
-      title: "Electricity Bill",
-      amount: 1200,
-      category: "Bills",
-    },
-  ]);
+  const [expenses, setExpenses] = useState(() => {
+    const saved = localStorage.getItem("expenses");
 
-  const categoryData = {
-    Food: {
-      icon: <FaUtensils />,
-      color: "#22c55e",
-    },
-    Travel: {
-      icon: <FaCar />,
-      color: "#3b82f6",
-    },
-    Shopping: {
-      icon: <FaShoppingBag />,
-      color: "#f59e0b",
-    },
-    Bills: {
-      icon: <FaBolt />,
-      color: "#ef4444",
-    },
-    Business: {
-      icon: <FaBriefcase />,
-      color: "#8b5cf6",
+    if (saved) {
+      return JSON.parse(saved);
+    }
+
+    return [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem(
+      "expenses",
+      JSON.stringify(expenses)
+    );
+  }, [expenses]);
+
+  const addExpense = () => {
+    if (!title || !amount) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    const newExpense = {
+      id: Date.now(),
+      title: title,
+      amount: Number(amount),
+      category: category,
+    };
+
+    setExpenses([newExpense, ...expenses]);
+
+    setTitle("");
+    setAmount("");
+    setCategory("Food");
+  };
+
+  const deleteExpense = (id) => {
+    const updated = expenses.filter(
+      (expense) => expense.id !== id
+    );
+
+    setExpenses(updated);
+  };
+
+  const totalExpense = expenses.reduce(
+    (total, expense) => total + expense.amount,
+    0
+  );
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: darkMode
+          ? "#0f172a"
+          : "#f1f5f9",
+        color: darkMode ? "white" : "black",
+        padding: "30px",
+        fontFamily: "Arial",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: "900px",
+          margin: "0 auto",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "30px",
+          }}
+        >
+          <h1>Expense Tracker</h1>
+
+          <button
+            onClick={() =>
+              setDarkMode(!darkMode)
+            }
 };
