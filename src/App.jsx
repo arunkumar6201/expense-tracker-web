@@ -527,4 +527,4 @@ const persist = (key, val) => {
     </div>
   );
 }
-export default App;
+export default function App()
